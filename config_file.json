@@ -1,0 +1,53 @@
+[
+  {
+    "script_name" : "DiagnosticApp1",
+    "script_path" : "scripts//test1.sh",
+    "script_summary" : "Script to assist with some stuff incoming ",
+    "script_options": [
+      {
+        "option_name" : "relaxer",
+        "option_type": "string",
+        "default_value": "test_option1"
+      },
+      {
+        "option_name" : "relaxeeee_file",
+        "option_type": "file_input"
+      }
+    ]
+  },
+  {
+    "script_name" : "DiagnosticApp2",
+    "script_path" : "scripts//test2.sh",
+    "script_summary" : "Script to relax",
+    "script_options": [
+      {
+          "option_name" : "relaxer",
+          "option_type": "string",
+          "default_value": "test_option1"
+      },
+      {
+          "option_name" : "relaxeeee_file",
+          "option_type": "file_input"
+      }
+    ]
+  },
+  {
+    "script_name" : "USBImageGeenrator",
+    "script_path" : "scripts//test3.sh",
+    "script_summary" : "Script to generate QNX x86 USB images for flashing ",
+    "script_options": [
+      {
+        "option_name" : "bsp_path",
+        "option_type": "file_input"
+      },
+      {
+        "option_name" : "app_path",
+        "option_type": "file_input"
+      },
+      {
+        "option_name" : "image_name",
+        "option_type": "string"
+      }
+    ]
+  }
+]

@@ -1,0 +1,40 @@
+{
+  "name": "Debugger Interface",
+  "version": "1.0.0",
+  "description": "Applicatiion for parallel debugging tool execution ",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "repository": "https://github.com/vagaruy/debugger-interface",
+  "keywords": [
+    "Electron",
+    "diagnostic",
+    "execution",
+    "userinterface",
+    "remoteexecution",
+    "sftp"
+  ],
+  "author": "Vipul Agarwal",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^17.2.0",
+    "nodemon": "^2.0.15"
+  },
+  "dependencies": {
+    "body-parser": "^1.19.2",
+    "bootstrap": "^5.1.3",
+    "docxtemplater": "^3.29.0",
+    "ejs": "^3.0.2",
+    "ejs-electron": "^2.1.0",
+    "electron-window-state": "^5.0.3",
+    "express": "^4.17.3",
+    "file-saver": "^2.0.5",
+    "font-awesome": "^4.7.0",
+    "jquery": "^3.6.0",
+    "pizzip": "^3.1.1",
+    "ssh2": "^1.9.0",
+    "xterm": "^4.18.0",
+    "xterm-addon-fit": "^0.5.0"
+  }
+}
