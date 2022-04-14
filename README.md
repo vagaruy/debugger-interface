@@ -225,12 +225,37 @@ It would be great to extend the application to also sequence the scripts so comp
 * [X] Reset terminal 
 
   ![image.png](assets/image-20220413135340-w7pralo.png)
-* [X] Add support for script execution via ssh and capture the output
+* [X] Add support for script execution via ssh and capture the output 
+
+  ![image.png](assets/image-20220414181847-dsm3u85.png)
 * [ ] Add pane for global configuration options in menu
 
   * [ ] Max script execution time policy
+  * [ ] Button to save all script output in one file
 * [X] Pipe the captured output on the screen
 * [X] Add ability to execute in loop with the number of values specified
 * [X] ~~Add support for simultaneous execution based on a global timer~~
 * [ ] Pass program option to run in daemon mode and be used remotely in a terminal .
-* [ ] On each script execution completion, trigger a desktop notification from backend to alert the user.
+* [ ] ~~On each script execution completion, trigger a desktop notification from backend to alert the user.~~
+
+
+## Usage Instructions
+
+1. Clone the repository and initialize the node modules 
+
+    ```json
+    git clone git@github.com:vagaruy/debugger-interface.git
+    cd debugger-interface 
+    #yarn can be installed using npm -i -g yarn 
+    yarn install
+    yarn run start
+    ```
+2. Package the application for linux distributions 
+
+    ```json
+    #Install electron-builder if not present 
+    #yarn -i electron-builder --global 
+    electron-builder -l
+    #Run using command below 
+    ./dist/*.AppImage
+    ```
