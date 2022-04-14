@@ -1,10 +1,33 @@
 {
-  "name": "Debugger Interface",
+  "name": "DebuggerInterface",
   "version": "1.0.0",
   "description": "Applicatiion for parallel debugging tool execution ",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
+  },
+  "build": {
+    "productName": "Debug Interface",
+    "artifactName": "DebuggerInterface-${version}.${ext}",
+    "appId": "io.vagaruy.debuginterface",
+    "files": [
+      "./index.ejs",
+      "./*.js",
+      "./README.md",
+      "assets",
+      "./*.json",
+      "scripts"
+    ],
+    "extraResources": [
+      {
+        "from": "config_file.json",
+        "to": "config_file.json"
+      },
+      {
+        "from": "scripts",
+        "to": "scripts"
+      }
+    ]
   },
   "repository": "https://github.com/vagaruy/debugger-interface",
   "keywords": [
@@ -19,6 +42,7 @@
   "license": "MIT",
   "devDependencies": {
     "electron": "^17.2.0",
+    "electron-builder": "^23.0.3",
     "nodemon": "^2.0.15"
   },
   "dependencies": {

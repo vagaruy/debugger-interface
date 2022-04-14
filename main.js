@@ -3,10 +3,17 @@
 /// the elements of the UI are fairly static at this point and we only need to traverse the DOM etc from that point onwards
 /// let the backend know of what to execute and where
 var fs = require('fs');
+const path = require('path')
 const { spawn } = require("child_process");
 const { Client } = require('ssh2');
+const dataPath =
+    process.defaultApp === true
+        ? path.join(__dirname)
+        : path.join(process.resourcesPath);
 
-var json = JSON.parse(fs.readFileSync('./config_file.json', 'utf8'));
+console.log(__dirname)
+console.log(process.resourcesPath)
+var json = JSON.parse(fs.readFileSync(path.join(dataPath,'config_file.json'), 'utf8'));
 
 // Modules to control application life and create native browser window
 const {app, BrowserWindow, ipcMain} = require('electron')
@@ -15,8 +22,6 @@ const {app, BrowserWindow, ipcMain} = require('electron')
 // EJS listens for template requests and renders them on the fly before servicing.
 const ejse = require('ejs-electron')
 ejse.data("config",json)
-
-const path = require('path')
 
 // Add support for remembering the location of the window and it's height and spawn there next time
 const windowStateKeeper = require('electron-window-state');
@@ -71,7 +76,7 @@ function createWindow () {
     let script_obj = request_command['script_obj']
     let transfer_success = false
     const conn = new Client();
-    let localPath = request_command["script_path"]
+    let localPath = path.join(dataPath, request_command["script_path"]);
     let filename = path.basename(localPath)
     let remotePath = "/tmp/" + filename
 
@@ -156,7 +161,8 @@ function createWindow () {
   function handleLocalExecution(request_command)
   {
     let script_obj = request_command['script_obj'];
-    const ls = spawn(request_command["script_path"] + " " + request_command["program_options"], {shell: true})
+    let scriptpath = path.join(dataPath, request_command["script_path"]);
+    const ls = spawn(scriptpath + " " + request_command["program_options"], {shell: true})
 
     // the below is used in IPC mechanism to send result back to the renderer for updating the UI with logs and exit code etc!
     ls.stdout.setEncoding('utf8');
