@@ -1,0 +1,383 @@
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>Diagnostic Application Runner</title>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="googlebot" content="noindex, nofollow">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <link rel="stylesheet" href="node_modules/xterm/css/xterm.css"/>
+    <script src="node_modules/xterm/lib/xterm.js"></script>
+    <script src="node_modules/xterm-addon-fit/lib/xterm-addon-fit.js"></script>
+    <script src="node_modules/file-saver/src/FileSaver.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet"
+          integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <script
+            src="https://code.jquery.com/jquery-3.6.0.slim.min.js"
+            integrity="sha256-u7e5khyithlIdTpu22PHhENmPcRdFiHRjhAuHcs05RI="
+            crossorigin="anonymous"></script>
+    <script type="text/javascript"
+            src="node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <link rel="stylesheet" type="text/css"
+          href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.1.1/css/all.min.css">
+    <script src="./renderer.js"></script>
+
+</head>
+<style>
+
+    html,body {
+        padding: 0;
+        margin: 0;
+    }
+
+    .application_box {
+        display: grid;
+
+        grid-template-areas:
+    "nav    content "
+    "footer footer";
+
+        grid-template-columns: 200px 1fr;
+        grid-template-rows: 1fr 20px;
+        grid-gap: 5px;
+        height: 100vh;
+        width:100%;
+    }
+
+
+    nav {
+        grid-area: nav;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        overflow: auto;
+    }
+
+    nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    main {
+        grid-area: content;
+        display: grid;
+        grid-template-areas:
+        "script_header   script_header                loop_counter"
+        "program_options remote_execution_options     loop_options "
+        "terminal        terminal                     terminal ";
+
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        grid-template-rows: 1fr 2fr 4fr;
+        grid-gap: 5px;
+        max-height: 100%;
+    }
+
+    script_header {
+        grid-area: script_header;
+    }
+    script_header::-webkit-scrollbar {
+        display: none;
+    }
+
+    progress_indicator{
+        grid-area : progress_indicator;
+    }
+
+    loop_counter {
+        grid-area: loop_counter;
+    }
+
+    program_options{
+        grid-area: program_options;
+        align-content: center;
+
+    }
+
+    program_options::-webkit-scrollbar {
+        display: none;
+    }
+
+    terminal {
+        grid-area: terminal;
+    }
+
+    loop_options{
+        grid-area: loop_options;
+    }
+
+    remote_execution_options {
+        grid-area: remote_execution_options;
+        display: flex;
+        flex-flow: column;
+align-content: center;
+    }
+
+    .break {
+        flex-basis: 100%;
+        height: 0;
+    }
+
+    footer {
+        grid-area: footer;
+        font-size: small;
+    }
+
+    div.sidebar_links
+    {
+        width: 100%;
+    }
+
+    .custom_btn {
+        background-color: transparent; /* Blue background */
+        border: none; /* Remove borders */
+        color: white; /* White text */
+       /* padding: 12px 16px; /* Some padding */
+        font-size: 16px; /* Set a font size */
+        cursor: pointer; /* Mouse pointer on hover */
+    }
+    .custom_btn:hover{
+        background-color: dodgerblue;
+    }
+
+</style>
+<body>
+
+<div>
+    <div class="application_box ">
+        <nav class="text-white bg-dark" >
+            <div >
+                <i class="fs-4 me-2 fa-solid fa-toolbox"></i>
+                <span class="fs-4"> Debugger</span>
+            </div>
+            <div class="sidebar_links"><hr /></div>
+            <div class="nav nav-pills flex-column sidebar_links" id="v-pills-tab" role="tablist" aria-orientation="vertical">
+                <% for(var i = 0; i < config.length; i++) { %>
+                    <button class="nav-link" id="<%= config[i].script_name %>" data-bs-toggle="pill"
+                            data-bs-target="#data-<%= config[i].script_name %>" type="button" role="tab"
+                            aria-controls="data-<%= config[i].script_name %>"
+                            aria-selected="false"> <%= config[i].script_name %></button>
+                <% } %>
+            </div>
+            <div class="sidebar_links"><hr /></div>
+        </nav>
+        <!-- Everything in here is script specific so it's all wrapped in appropriate div elements for modal switching -->
+         <div class="tab-content flex-column bg-dark" style="height: 100vh;" id="v-pills-tabContent">
+                <% for(var i = 0; i < config.length; i++) { %>
+                    <div class="tab-pane fade" style="height: 100vh;" id="data-<%= config[i].script_name %>" role="tabpanel"
+                         aria-labelledby="#data-<%= config[i].script_name %>-tab">
+                        <!-- Main content -->
+                        <main class="bg-dark text-white ">
+                            <script_header class="overflow-auto ">
+                                <h3><%= config[i].script_name %></h3>
+                                <p><strong><%= config[i].script_summary %></strong></p>
+                            </script_header>
+                            <loop_counter >
+                                <div>
+                                    <button class="custom_btn" id="save_button-<%= config[i].script_name %>" onclick="saveLogs(this,'<%= config[i].script_name %>')"> <i class="fs-2 me-2 fa-solid fa-save"></i> </button>
+                                    <button class="custom_btn" id="clear_button-<%= config[i].script_name %>" onclick="clearLogs(this,'<%= config[i].script_name %>')"> <i class="fs-2 me-2 fa-solid fa-eraser"></i></button>
+                                </div>
+                                <div>
+                                    <h2 id="loop_counter-<%= config[i].script_name %>"></h2>
+                                </div>
+                            </loop_counter>
+                            <program_options class="overflow-scroll" >
+                                <form title="Enter Program Options" id="form-<%= config[i].script_name %>" onSubmit="return submita(this, '<%= config[i].script_name %>', '<%= config[i].script_path %>')">
+                                    <fieldset>
+                                        <p>Enter the Program Options
+                                        <hr />
+                                        <div class="form-row align-items-center">
+                                            <!--Populate the program options from the json file -->
+                                            <% for(var j = 0; j < config[i].script_options.length; j++) { %>
+                                                <div >
+                                                    <label for="inlineFormInput_<%= config[i].script_name %>_<%= config[i].script_options[j].option_name %>"><%= config[i].script_options[j].option_name %></label>
+                                                    <% if (config[i].script_options[j].option_type == 'string') { %>
+                                                        <input type="text" size="4" class="form-control-sm mb-2"
+                                                               id="inlineFormInput_<%= config[i].script_name %>_<%= config[i].script_options[j].option_name %>"
+                                                        >
+                                                    <% } else if  (config[i].script_options[j].option_type == 'file_input') { %>
+                                                        <input type="file" class="form-control-sm mb-2"
+                                                               id="inlineFormInput_<%= config[i].script_name %>_<%= config[i].script_options[j].option_name %>">
+                                                    <% } %>
+                                                </div>
+                                            <% }
+                                            %>
+                                            <div class="col-3">
+                                                <button type="submit" id="submit_button_<%= config[i].script_name %>" class="btn btn-primary mb-2">Execute
+                                                </button>
+                                            </div>
+
+                                        </div>
+
+                                        </fieldset>
+                                </form>
+                            </program_options>
+                            <remote_execution_options>
+                                <label for="RemoteExecution-<%= config[i].script_name %>">
+                                    <input type="checkbox" id="RemoteExecution-<%= config[i].script_name %>" onclick="EnableDisableRemoteExecution(this,'<%= config[i].script_name %>')" />
+                                    Remote Execution
+                                </label>
+                                <hr />
+                                <div >
+                                    <label for="remote_address-<%= config[i].script_name %>">Address</label>
+                                    <input type="text" id="remote_address-<%= config[i].script_name %>" disabled="disabled" size="4" />
+                                </div>
+                                <div >
+                                    <label for="remote_user-<%= config[i].script_name %>">Username</label>
+                                    <input type="text" id="remote_user-<%= config[i].script_name %>" disabled="disabled" size="4" />
+                                </div>
+                                <div >
+                                    <label for="remote_password-<%= config[i].script_name %>">Password</label>
+                                    <input type="password" id="remote_password-<%= config[i].script_name %>" disabled="disabled" size="4" />
+                                </div>
+                            </remote_execution_options>
+                            <loop_options >
+                                <div class="flex-column">
+                                    <label for="Looper-<%= config[i].script_name %>">
+                                        <input type="checkbox" id="Looper-<%= config[i].script_name %>" onclick="EnableDisableTextBox(this,'<%= config[i].script_name %>')" />
+                                        Loop Execution
+                                    </label>
+                                    <hr />
+                                    <div>
+                                        <label for="loop_count-<%= config[i].script_name %>">Loop Count</label>
+                                        <input type="text" id="loop_count-<%= config[i].script_name %>" disabled="disabled" size="3" />
+                                    </div>
+                                    <div>
+                                        <label for="loop_delay-<%= config[i].script_name %>">Loop Delay</label>
+                                        <input type="text" id="loop_delay-<%= config[i].script_name %>" disabled="disabled" size="3"/>
+                                    </div>
+                                    <label for="stop_loop_condition-<%= config[i].script_name %>">
+                                        Stop on First Error
+                                        <input type="checkbox" id="stop_loop_condition-<%= config[i].script_name %>" disabled="disabled" />
+                                    </label>
+                                </div>
+                            </loop_options>
+                            <terminal >
+                                <div style="width: 100%;height: 100%;" id="terminal-<%= config[i].script_name %>"></div>
+                            </terminal>
+                        </main>
+                    </div>
+                <% }
+                %>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    // Functin to save the current terminal output to a file
+    function saveLogs(param, objname)
+    {
+        let filename= objname + ".log"
+        global_store[objname]['term'].selectAll();
+        let current_selection = global_store[objname]['term'].getSelection();
+        var blob = new Blob([current_selection], {type: "text/plain;charset=utf-8"});
+        saveAs(blob, filename);
+        global_store[objname]['term'].clearSelection();
+    }
+
+    // Functin to save the current terminal output to a file
+    function clearLogs(param, objname)
+    {
+        global_store[objname]['term'].clear();
+    }
+
+    function EnableDisableRemoteExecution(remote_execution_form,objname){
+        var remote_address = document.getElementById("remote_address-" + objname);
+        var remote_user = document.getElementById("remote_user-" + objname);
+        var remote_password = document.getElementById("remote_password-" + objname);
+        if(remote_execution_form.checked)
+        {
+            remote_password.disabled = false;
+            remote_address.disabled = false;
+            remote_user.disabled = false;
+        }
+        else
+        {
+            remote_password.disabled = true;
+            remote_password.value = "";
+            remote_address.disabled = true;
+            remote_address.value = "";
+            remote_user.disabled = true;
+            remote_user.value = "";
+        }
+    }
+
+    function EnableDisableTextBox(loopForm,objname) {
+        var loop_count = document.getElementById("loop_count-" + objname);
+        var loop_delay = document.getElementById("loop_delay-" + objname);
+        var stop_condition = document.getElementById("stop_loop_condition-" + objname);
+        if(loopForm.checked)
+        {
+            loop_count.disabled = false;
+            loop_delay.disabled = false;
+            stop_condition.disabled = false;
+        }
+        else
+        {
+           loop_count.disabled = true;
+           loop_count.value = "";
+           loop_delay.disabled = true;
+           loop_delay.value = "";
+           stop_condition.disabled = true;
+           stop_condition.checked = false;
+        }
+    }
+
+    // vscode-snazzy https://github.com/Tyriar/vscode-snazzy
+    var vscode_theme = {
+        foreground: '#eff0eb',
+        background: '#282a36',
+        selection: '#97979b33',
+        black: '#282a36',
+        brightBlack: '#686868',
+        red: '#ff5c57',
+        brightRed: '#ff5c57',
+        green: '#5af78e',
+        brightGreen: '#5af78e',
+        yellow: '#f3f99d',
+        brightYellow: '#f3f99d',
+        blue: '#57c7ff',
+        brightBlue: '#57c7ff',
+        magenta: '#ff6ac1',
+        brightMagenta: '#ff6ac1',
+        cyan: '#9aedfe',
+        brightCyan: '#9aedfe',
+        white: '#f1f1f0',
+        brightWhite: '#eff0eb'
+    };
+    var global_store = {};
+
+    <% for(var i = 0; i < config.length; i++) { %>
+    global_store.<%= config[i].script_name %> = {};
+    // Initialize some with default values for the first execution .
+    global_store['<%= config[i].script_name %>']['loop_timeout_not_elapsed'] = false
+    global_store['<%= config[i].script_name %>']['exec_done'] = true
+
+    global_store.<%= config[i].script_name %>.term = new Terminal({
+        fontFamily: '"Cascadia Code", Menlo, monospace',
+        theme: vscode_theme,
+        cursorBlink: true,
+        convertEol: true
+    });
+
+    const fitAddon_<%= config[i].script_name %> = new FitAddon.FitAddon();
+    global_store['<%= config[i].script_name %>']['term'].loadAddon(fitAddon_<%= config[i].script_name %>);
+    global_store['<%= config[i].script_name %>']['term'].open(document.getElementById('terminal-<%= config[i].script_name %>'))
+
+    // Make the terminal's size and geometry fit the size of #terminal-container
+    $('button[id=<%= config[i].script_name %>]').on('shown.bs.tab', function (e) {
+        fitAddon_<%= config[i].script_name %>.fit();
+    });
+    window.addEventListener('resize', function (e) {
+        fitAddon_<%= config[i].script_name %>.fit();
+    });
+
+
+    global_store['<%= config[i].script_name %>']['term'].writeln('$')
+    <% }
+    %>
+
+</script>
+
+</body>
+</html>
